@@ -4,22 +4,30 @@ services:
     environment:
       - GOG_KEYRING_BACKEND=${GOG_KEYRING_BACKEND}
       - GOG_KEYRING_PASSWORD=${GOG_KEYRING_PASSWORD}
-#      - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
+      - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    env_file:
+      - ./.env
     build:
       context: .
       dockerfile: Dockerfile.hlasg
-   # volumes:
-   #   - gog-config:/home/node/.config/gogcli
   openclaw-cli:
     image: openclaw:hlasg-1.1
     environment:
       - GOG_KEYRING_BACKEND=${GOG_KEYRING_BACKEND}
       - GOG_KEYRING_PASSWORD=${GOG_KEYRING_PASSWORD}
- #     - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
-    #volumes:
-    #  - gog-config:/home/node/.config/gogcli
+      - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    env_file:
+      - ./.env    
     build:
       context: .
       dockerfile: Dockerfile.hlasg
+  cognee-backend:
+    image: cognee/cognee:main
+    container_name: cognee-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
