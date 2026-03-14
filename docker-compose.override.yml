@@ -23,11 +23,3 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.hlasg
-  cognee-backend:
-    image: cognee/cognee:main
-    container_name: cognee-backend
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    env_file:
-      - ./.env
