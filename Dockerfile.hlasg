@@ -227,33 +227,54 @@ sqlite3 \
 
 && rm -rf /var/lib/apt/lists/*
 
-# Install Homebrew (Linuxbrew)
-RUN useradd -m -s /bin/bash linuxbrew || true
-RUN su - linuxbrew -c '/bin/bash -lc "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
 
-# Make brew available
-# ENV HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
-# ENV PATH=${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:${PATH}
 
-ENV HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
-ENV PATH=${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:${HOMEBREW_PREFIX}/opt/bun/bin:/home/linuxbrew/.bun/bin:${PATH}
 
-# Install gog from brew
-#RUN brew install bun
-#RUN su - linuxbrew -c 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && brew update && brew install bun'
-RUN su - linuxbrew -c '\
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && \
-    brew update && \
-    brew tap oven-sh/bun && \
-    brew install bun \
-'
 
-# Install QMD via bun
-#RUN bun install -g https://github.com/tobi/qmd
-RUN su - linuxbrew -c 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && bun install -g @tobilu/qmd'
+# Prepare Homebrew directory with correct ownership
+RUN mkdir -p /home/linuxbrew/.linuxbrew \
+    && chown -R node:node /home/linuxbrew
 
-# Ensure bun global bin is available too
-ENV PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/root/.bun/bin:${PATH}
+# Install Homebrew as the non-root 'node' user (OpenClaw default user)
+USER node
+RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Add Homebrew to PATH permanently
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+ENV HOMEBREW_NO_AUTO_UPDATE=1
+ENV HOMEBREW_NO_INSTALL_CLEANUP=1
+
+
+
+
+
+# Install Bun
+RUN /bin/bash -c 'eval "$(brew shellenv)" && brew update --quiet && brew tap oven-sh/bun && brew install bun'
+
+# Install qmd + fix symlink
+RUN /bin/bash -c 'eval "$(brew shellenv)" && bun install -g @tobilu/qmd'
+RUN /bin/bash -c 'eval "$(brew shellenv)" && ln -sf "$(bun pm bin -g)/qmd" /home/linuxbrew/.linuxbrew/bin/qmd || true'
+
+# === Install gogcli properly via Homebrew (now in homebrew-core) ===
+RUN /bin/bash -c 'eval "$(brew shellenv)" && brew install gogcli'
+
+# Create "gog" symlink (OpenClaw expects the command "gog")
+RUN /bin/bash -c 'eval "$(brew shellenv)" && ln -sf $(which gogcli) /home/linuxbrew/.linuxbrew/bin/gog'
+
+# Verification
+RUN /bin/bash -c 'eval "$(brew shellenv)" && \
+    echo "=== Versions ===" && \
+    bun --version && \
+    qmd --version && \
+    gog --version && \
+    echo "✅ All tools installed successfully"'
+
+
+
+
+
+
+USER root
 
 #####
 ### HLASG End
