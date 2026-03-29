@@ -1,6 +1,6 @@
 services:
   openclaw-gateway:
-    image: openclaw:hlasg-1.1
+    image: openclaw:hlasg-1.2
     environment:
       - GOG_KEYRING_BACKEND=${GOG_KEYRING_BACKEND}
       - GOG_KEYRING_PASSWORD=${GOG_KEYRING_PASSWORD}

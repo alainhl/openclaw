@@ -209,6 +209,11 @@ RUN ln -sf /app/openclaw.mjs /usr/local/bin/openclaw \
 ENV NODE_ENV=production
 
 
+
+
+
+
+
 #######
 ### HLASG Local Configuration
 ######
@@ -224,12 +229,8 @@ file \
 git \
 ca-certificates \
 sqlite3 \
-
+awscli \ 
 && rm -rf /var/lib/apt/lists/*
-
-
-
-
 
 # Prepare Homebrew directory with correct ownership
 RUN mkdir -p /home/linuxbrew/.linuxbrew \
@@ -243,10 +244,6 @@ RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/instal
 ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
 ENV HOMEBREW_NO_AUTO_UPDATE=1
 ENV HOMEBREW_NO_INSTALL_CLEANUP=1
-
-
-
-
 
 # Install Bun
 RUN /bin/bash -c 'eval "$(brew shellenv)" && brew update --quiet && brew tap oven-sh/bun && brew install bun'
@@ -269,16 +266,24 @@ RUN /bin/bash -c 'eval "$(brew shellenv)" && \
     gog --version && \
     echo "✅ All tools installed successfully"'
 
-
-
-
-
-
 USER root
 
 #####
 ### HLASG End
 #####
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Security hardening: Run as non-root user
 # The node:22-bookworm image includes a 'node' user (uid 1000)
